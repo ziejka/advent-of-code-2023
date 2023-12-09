@@ -147,9 +147,6 @@ fn process(s: String) {
         })
         .map(|r| {
             let kind = r.get_kind();
-            if r.hand.contains('J') {
-                println!("{:?} {:?}", kind, r.hand);
-            }
             RoundWithKind { round: r, kind }
         })
         .collect::<Vec<_>>();
