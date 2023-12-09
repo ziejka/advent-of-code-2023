@@ -1,6 +1,9 @@
+use indicatif::ProgressBar;
+use rayon::prelude::*;
 use std::{
     collections::HashMap,
     str::{FromStr, Lines},
+    time::Instant,
     vec,
 };
 
@@ -52,54 +55,62 @@ fn process(str: String) {
         .filter_map(|s| s.parse::<u64>().ok())
         .collect::<Vec<u64>>();
 
-    let seeds_tuple = seeds.chunks(2).filter_map(|chunk| {
-        if chunk.len() == 2 {
-            Some((chunk[0], chunk[1]))
-        } else {
-            None
-        }
-    });
+    let seeds_tuple = seeds
+        .chunks(2)
+        .filter_map(|chunk| {
+            if chunk.len() == 2 {
+                Some((chunk[0], chunk[1]))
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
 
     let mut transformers = HashMap::<String, Vec<SourceToDestination>>::new();
     let mut key = "".to_string();
     parse_lines(&mut lines_iter, &mut transformers, &mut key);
 
-    let mut total_min_location = 0;
+    let total_seeds = seeds_tuple
+        .iter()
+        .map(|(_, end_number)| end_number)
+        .sum::<u64>();
+    let pb = ProgressBar::new(total_seeds);
 
-    for (start_number, end_number) in seeds_tuple.into_iter() {
-        let mut min_location = 0;
+    let total_min_location = seeds_tuple
+        .into_par_iter()
+        .map(|(start_number, end_number)| {
+            let mut min_location = 0;
 
-        let mut seed_number = start_number.clone();
-        while seed_number < start_number + end_number {
-            let mut source_number: u64 = seed_number.clone();
+            let mut seed_number = start_number;
+            while seed_number < start_number + end_number {
+                let mut source_number: u64 = seed_number;
 
-            MAP_ORDER.iter().for_each(|key| {
-                let transformations = transformers.get(&key.to_string()).unwrap();
+                for key in &MAP_ORDER {
+                    let transformations = transformers.get(*key).unwrap();
 
-                for transformation in transformations {
-                    if source_number >= transformation.source_start
-                        && source_number < (transformation.source_start + transformation.size)
-                    {
-                        let diff = source_number - transformation.source_start;
-                        let destination_number = transformation.destination_start + diff;
-                        source_number = destination_number.clone();
+                    for transformation in transformations {
+                        if source_number >= transformation.source_start
+                            && source_number < (transformation.source_start + transformation.size)
+                        {
+                            let diff = source_number - transformation.source_start;
+                            let destination_number = transformation.destination_start + diff;
+                            source_number = destination_number.clone();
 
-                        break;
+                            break;
+                        }
                     }
                 }
-            });
 
-            if min_location == 0 || source_number < min_location {
-                min_location = source_number;
+                if min_location == 0 || source_number < min_location {
+                    min_location = source_number;
+                }
+                seed_number += 1;
+                pb.inc(1)
             }
-            seed_number += 1;
-            println!("seed_number: {}", seed_number)
-        }
-
-        if total_min_location == 0 || min_location < total_min_location {
-            total_min_location = min_location;
-        }
-    }
+            min_location
+        })
+        .min()
+        .unwrap_or(0);
     println!("min_location: {}", total_min_location);
 }
 
@@ -144,6 +155,8 @@ fn parse_line(line: &str, transformers: &mut Transformations, key: &mut String) 
 }
 
 fn main() {
+    let start = Instant::now();
+
     let _input = std::fs::read_to_string("src/bin/input").expect("file name input");
     let _test = "seeds: 79 14 55 13
 
@@ -181,6 +194,10 @@ humidity-to-location map:
         .to_string();
 
     process(_input);
+
+    let duration = start.elapsed();
+
+    println!("Total time elapsed is: {:?}", duration);
 }
 
 #[cfg(test)]
