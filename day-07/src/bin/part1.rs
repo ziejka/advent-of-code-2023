@@ -35,28 +35,27 @@ impl Round {
         });
 
         let values: Vec<_> = kind.values().collect();
+        let max = values.iter().max().unwrap();
 
-        if values.iter().any(|&&v| v == 5) {
-            return Kind::FiveOfAKind;
+        match max {
+            5 => return Kind::FiveOfAKind,
+            4 => return Kind::FourOfAKind,
+            3 => {
+                if values.iter().any(|&&v| v == 2) {
+                    return Kind::FullHouse;
+                }
+                return Kind::TheeOfAKind;
+            }
+            2 => {
+                if values.iter().filter(|&&&v| v == 2).count() == 2 {
+                    return Kind::TwoPairs;
+                }
+                return Kind::Pair;
+            }
+            _ => {
+                return Kind::HighCard;
+            }
         }
-        if values.iter().any(|&&v| v == 4) {
-            return Kind::FourOfAKind;
-        }
-        if values.iter().any(|&&v| v == 3) && values.iter().any(|&&v| v == 2) {
-            return Kind::FullHouse;
-        }
-        if values.iter().any(|&&v| v == 3) {
-            return Kind::TheeOfAKind;
-        }
-
-        let pairs = values.iter().filter(|&&&v| v == 2).count();
-        if pairs == 2 {
-            return Kind::TwoPairs;
-        }
-        if pairs == 1 {
-            return Kind::Pair;
-        }
-        return Kind::HighCard;
     }
 }
 
@@ -101,6 +100,7 @@ fn process(s: String) {
                 if a != b {
                     let a_rank = rank_mapping.get(&a).unwrap();
                     let b_rank = rank_mapping.get(&b).unwrap();
+                    // revert order to get descending order
                     return a_rank.cmp(&b_rank);
                 }
             }
@@ -120,5 +120,5 @@ fn main() {
     let _input = std::fs::read_to_string("src/bin/input").expect("file name input");
     let _test = std::fs::read_to_string("src/bin/test").expect("file name input");
 
-    process(_input);
+    process(_test);
 }
