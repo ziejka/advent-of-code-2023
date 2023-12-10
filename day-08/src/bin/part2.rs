@@ -68,7 +68,6 @@ fn process(s: String) {
         .map(|start_key| walk(&instructions, &codes, start_key, &mut 0))
         .collect::<Vec<u64>>();
 
-    println!("min steps: {:?}", steps);
     println!("result : {:?}", steps.lowest_common_multiple());
 }
 
