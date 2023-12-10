@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet},
-    vec,
-};
+use std::collections::{HashMap, HashSet};
 
 fn step<'a>(
     codes: &'a HashMap<String, [String; 2]>,
@@ -64,12 +61,15 @@ fn walk<'a>(
     num_steps: &mut usize,
     instructions: &'a Vec<usize>,
 ) {
-    let mut all_done: Vec<bool> = vec![false];
+    let mut all_done: bool = false;
 
-    while all_done.contains(&false) {
+    while !all_done {
+        if *num_steps % 10000 == 0 {
+            println!("num_steps: {}", num_steps);
+        }
         for idx in instructions.iter() {
             *num_steps += 1;
-            all_done = vec![];
+            all_done = true;
 
             let mut temp_keys: Vec<&String> = Vec::new();
 
@@ -77,7 +77,9 @@ fn walk<'a>(
                 let mut is_done = false;
                 let new_key = step(&codes, start_key, idx, &mut is_done);
                 temp_keys.push(new_key);
-                all_done.push(is_done);
+                if !is_done {
+                    all_done = false;
+                }
             }
 
             keys.clear();
@@ -85,7 +87,7 @@ fn walk<'a>(
                 keys.insert(new_key);
             }
 
-            if !all_done.contains(&false) {
+            if all_done {
                 println!("Found ZZZ in {} steps", num_steps);
                 return;
             }
