@@ -1,13 +1,3 @@
-fn parse_line(s: &str) -> (String, Vec<u32>) {
-    let iterator = s.split(" ");
-    let parts = iterator.next().unwrap();
-
-    let lengths = iterator.
-
-}
-
-fn is_valid(s: &str, lengths: &Vec<u32>) -> bool {}
-
 fn process(s: String) {}
 
 fn main() {
@@ -22,7 +12,5 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_fn() {
-        assert_eq!("#.#.### 1,1,3", 1);
-    }
+    fn test_fn() {}
 }
