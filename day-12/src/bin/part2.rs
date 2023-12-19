@@ -1,74 +1,110 @@
+use core::num;
+
 use indicatif::ProgressBar;
 use rayon::prelude::*;
-use std::collections::HashSet;
 
-fn parse_line(s: String) -> (String, Vec<u32>) {
+fn parse_line(s: String) -> (String, Vec<usize>) {
     let mut iterator = s.split(" ");
     let parts = iterator.next().unwrap();
 
-    let lengths: Vec<u32> = iterator
+    let lengths: Vec<usize> = iterator
         .next()
         .unwrap()
         .split(',')
-        .filter_map(|x| x.parse::<u32>().ok())
+        .filter_map(|x| x.parse::<usize>().ok())
         .collect();
 
     (parts.to_string(), lengths)
 }
 
-fn is_valid(s: &str, lengths: &Vec<u32>) -> bool {
-    let parts_lengths = s
-        .split('.')
-        .filter(|&p| !p.is_empty())
-        .map(|p| p.len() as u32)
-        .collect::<Vec<u32>>();
-    if parts_lengths.len() != lengths.len() {
-        return false;
+fn calculate_combinations(parts: &mut Vec<char>, lengths: &mut Vec<usize>, result: &mut usize) {
+    println!("{:?} {:?}", parts, lengths);
+    if parts.is_empty() {
+        if lengths.is_empty() {
+            *result += 1;
+        }
+    } else if lengths.is_empty() {
+        if !parts.contains(&'#') {
+            *result += 1;
+        }
+    } else {
+        if vec!['.', '#'].contains(&parts[0]) {
+            parts.remove(0);
+            calculate_combinations(parts, lengths, result)
+        } else if vec!['#', '?'].contains(&parts[0]) {
+            if lengths[0] <= parts.len()
+                && !parts.iter().take(lengths[0]).any(|&c| c == '.')
+                && (lengths[0] == parts.len() || parts[lengths[0]] != '#')
+            {
+                parts.remove(lengths[0] + 1);
+                lengths.remove(0);
+                calculate_combinations(parts, lengths, result)
+            }
+        }
     }
-    &parts_lengths == lengths
 }
 
-fn generate_combination(s: &mut Vec<char>, start: usize, result: &mut HashSet<String>) {
-    if let Some(i) = s[start..].iter().position(|&c| c == '?') {
-        let i = start + i;
-        s[i] = '#';
-        generate_combination(s, i + 1, result);
-        s[i] = '.';
-        generate_combination(s, i + 1, result);
-        s[i] = '?';
-    } else {
-        let combination = s.iter().collect::<String>();
-        result.insert(combination);
+fn count(config: &mut Vec<char>, numbers: &mut Vec<usize>) -> usize {
+    println!("{:?} {:?}", config, numbers);
+    if config.is_empty() {
+        return if numbers.is_empty() { 1 } else { 0 };
     }
+
+    if numbers.is_empty() {
+        return if config.contains(&'#') { 0 } else { 1 };
+    }
+
+    let mut result = 0;
+
+    if vec!['.', '?'].contains(&config[0]) {
+        config.remove(0);
+        result += count(config, numbers);
+    }
+
+    if !config.is_empty() && vec!['#', '?'].contains(&config[0]) {
+        if numbers[0] <= config.len()
+            && !config.iter().take(numbers[0]).any(|&c| c == '.')
+            && (numbers[0] == config.len() || config[numbers[0]] != '#')
+        {
+            config.drain(0..numbers[0] + 1);
+            numbers.remove(0);
+            result += count(config, numbers);
+        }
+    }
+
+    result
 }
 
 fn process(s: String) {
     let strings = s.lines().map(|l| l.to_string()).collect::<Vec<String>>();
     let pb = ProgressBar::new(strings.len() as u64);
 
-    let r: u32 = strings
+    let r: Vec<usize> = strings
         .into_par_iter()
         .map(|l| parse_line(l))
         .map(|(parts, lengths)| {
-            let mut results = HashSet::new();
-            let big_string = std::iter::repeat(parts)
-                .take(5)
-                .collect::<Vec<String>>()
-                .join("?");
+            let mut results: usize = 0;
+            // let big_parts = std::iter::repeat(parts)
+            //     .take(5)
+            //     .collect::<Vec<String>>()
+            //     .join("?");
 
-            let big_length = std::iter::repeat(lengths)
-                .take(5)
-                .flatten()
-                .collect::<Vec<u32>>();
+            // let mut big_length = std::iter::repeat(lengths)
+            //     .take(5)
+            //     .flatten()
+            //     .collect::<Vec<usize>>();
 
-            let mut temp_parts: Vec<char> = big_string.chars().collect();
+            // let mut temp_parts: Vec<char> = big_parts.chars().collect();
 
-            generate_combination(&mut temp_parts, 0, &mut results);
+            let mut t: Vec<char> = parts.clone().chars().collect::<Vec<char>>();
+            let mut n = lengths.clone();
+
+            let re = count(&mut t, &mut n);
 
             pb.inc(1);
-            results.iter().filter(|&r| is_valid(r, &big_length)).count() as u32
+            re
         })
-        .sum();
+        .collect();
 
     println!("{:?}", r);
 }
@@ -78,28 +114,4 @@ fn main() {
     let _test = std::fs::read_to_string("src/bin/test").expect("file name input");
 
     process("???.### 1,1,3".to_string());
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn test_fn() {
-        let parsed_line = parse_line("#.#.### 1,1,3".to_string());
-        let parsed_line_fail = parse_line("##.#.### 1,1,3".to_string());
-
-        assert_eq!(parsed_line, ("#.#.###".to_string(), vec![1, 1, 3]));
-        assert_eq!(is_valid(&parsed_line.0, &parsed_line.1), true);
-        assert_eq!(is_valid(&parsed_line_fail.0, &parsed_line_fail.1), false);
-    }
-
-    #[test]
-    fn test_combination_generation() {
-        let mut s = vec!['?', '?', '?'];
-        let mut result = HashSet::new();
-        generate_combination(&mut s, 0, &mut result);
-
-        assert_eq!(result.len(), 8);
-    }
 }
