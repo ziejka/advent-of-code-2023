@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fmt, str::FromStr};
 
-fn calculate(s: &String) -> usize {
+fn calculate(s: &str) -> usize {
     let mut current = 0;
 
     for c in s.chars() {
@@ -84,7 +84,10 @@ struct Command {
 
 impl Command {
     fn execute(&self, boxes: &mut Facility) {
-        let b = boxes.boxes.get_mut(self.box_idx).unwrap();
+        let b = boxes
+            .boxes
+            .get_mut(self.box_idx)
+            .expect("box item expected");
         match self.action {
             Action::Remove => {
                 b.map.remove_entry(&self.label);
@@ -93,10 +96,10 @@ impl Command {
                 }
             }
             Action::Add => {
-                if !b.map.contains_key(&self.label) {
+                let new_entry = b.map.insert(self.label.clone(), self.lense_size);
+                if new_entry.is_none() {
                     b.order.push(self.label.clone());
                 }
-                b.map.insert(self.label.clone(), self.lense_size);
             }
         }
     }
