@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use day_16::{
     point::Point,
     tiles::{Direction, Tiles},
@@ -67,7 +69,10 @@ fn main() {
     let _input = std::fs::read_to_string("src/bin/input").expect("file name input");
     let _test = std::fs::read_to_string("src/bin/test").expect("file name input");
 
+    let stat = Instant::now();
     process(_input);
+    let duration = stat.elapsed();
+    println!("Elapse {:?}", duration);
 }
 
 #[cfg(test)]
