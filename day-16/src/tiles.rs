@@ -6,8 +6,9 @@ use std::{
 
 use crate::point::Point;
 
+#[derive(Clone)]
 pub struct Tiles {
-    tiles: Vec<Vec<char>>,
+    pub tiles: Vec<Vec<char>>,
     pub excited: HashSet<String>,
     visited: HashSet<String>,
 }
@@ -24,10 +25,10 @@ impl FromStr for Tiles {
     }
 }
 
-enum Direction {
+pub enum Direction {
     Left,
     Right,
-    Up,
+    Top,
     Down,
     None,
 }
@@ -36,12 +37,10 @@ fn get_visited_key(from_point: &Point, to_point: &Point) -> String {
 }
 
 impl Tiles {
-    pub fn calculate(&mut self) {
-        let mut from_points = VecDeque::from([Point { x: 0, y: 0 }]);
+    pub fn calculate(&mut self, start_point: &Point, from_dir: Direction) {
+        let mut from_points = VecDeque::from([start_point.clone()]);
         let mut points = VecDeque::new();
-        if let Some(v) =
-            self.get_new_point_from_char(&self.tiles[0][0], &Point { x: 0, y: 0 }, Direction::Left)
-        {
+        if let Some(v) = self.get_new_point_from_char(&start_point, from_dir) {
             points.push_back(v[0].clone());
         }
 
@@ -67,34 +66,25 @@ impl Tiles {
         let from_dir = match p_diff {
             (-1, 0) => Direction::Left,
             (1, 0) => Direction::Right,
-            (0, -1) => Direction::Up,
+            (0, -1) => Direction::Top,
             (-0, 1) => Direction::Down,
             _ => Direction::None,
         };
 
-        match self
-            .tiles
-            .get(to_point.y)
-            .and_then(|row| row.get(to_point.x))
-        {
-            Some(c) => self.get_new_point_from_char(c, to_point, from_dir),
-            None => None,
-        }
+        self.get_new_point_from_char(to_point, from_dir)
     }
 
-    fn get_new_point_from_char(
-        &self,
-        c: &char,
-        point: &Point,
-        from_dir: Direction,
-    ) -> Option<Vec<Point>> {
-        return match c {
-            '-' => self.get_horizontal_points(point, from_dir),
-            '|' => self.get_vertical_points(point, from_dir),
-            '\\' => self.get_right_slide_points(point, from_dir),
-            '/' => self.get_left_slide_points(point, from_dir),
-            _ => self.get_default_points(point, from_dir),
-        };
+    fn get_new_point_from_char(&self, point: &Point, from_dir: Direction) -> Option<Vec<Point>> {
+        match self.tiles.get(point.y).and_then(|row| row.get(point.x)) {
+            Some(c) => match c {
+                '-' => self.get_horizontal_points(point, from_dir),
+                '|' => self.get_vertical_points(point, from_dir),
+                '\\' => self.get_right_slide_points(point, from_dir),
+                '/' => self.get_left_slide_points(point, from_dir),
+                _ => self.get_default_points(point, from_dir),
+            },
+            None => None,
+        }
     }
 
     // Char: -
@@ -102,7 +92,7 @@ impl Tiles {
         match from_dir {
             Direction::Left => self.get_points(point, vec![Self::get_right_point]),
             Direction::Right => self.get_points(point, vec![Self::get_left_point]),
-            Direction::Up => {
+            Direction::Top => {
                 self.get_points(point, vec![Self::get_left_point, Self::get_right_point])
             }
             Direction::Down => {
@@ -121,7 +111,7 @@ impl Tiles {
             Direction::Right => {
                 self.get_points(point, vec![Self::get_down_point, Self::get_up_point])
             }
-            Direction::Up => self.get_points(point, vec![Self::get_down_point]),
+            Direction::Top => self.get_points(point, vec![Self::get_down_point]),
             Direction::Down => self.get_points(point, vec![Self::get_up_point]),
             Direction::None => None,
         }
@@ -132,7 +122,7 @@ impl Tiles {
         match from_dir {
             Direction::Left => self.get_points(point, vec![Self::get_down_point]),
             Direction::Right => self.get_points(point, vec![Self::get_up_point]),
-            Direction::Up => self.get_points(point, vec![Self::get_right_point]),
+            Direction::Top => self.get_points(point, vec![Self::get_right_point]),
             Direction::Down => self.get_points(point, vec![Self::get_left_point]),
             Direction::None => None,
         }
@@ -143,7 +133,7 @@ impl Tiles {
         match from_dir {
             Direction::Left => self.get_points(point, vec![Self::get_up_point]),
             Direction::Right => self.get_points(point, vec![Self::get_down_point]),
-            Direction::Up => self.get_points(point, vec![Self::get_left_point]),
+            Direction::Top => self.get_points(point, vec![Self::get_left_point]),
             Direction::Down => self.get_points(point, vec![Self::get_right_point]),
             Direction::None => None,
         }
@@ -154,7 +144,7 @@ impl Tiles {
         match from_dir {
             Direction::Left => self.get_points(point, vec![Self::get_right_point]),
             Direction::Right => self.get_points(point, vec![Self::get_left_point]),
-            Direction::Up => self.get_points(point, vec![Self::get_down_point]),
+            Direction::Top => self.get_points(point, vec![Self::get_down_point]),
             Direction::Down => self.get_points(point, vec![Self::get_up_point]),
             Direction::None => None,
         }
