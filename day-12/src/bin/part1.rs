@@ -15,7 +15,7 @@ fn parse_line(s: String) -> (String, Vec<u32>) {
     (parts.to_string(), lengths)
 }
 
-fn is_valid(s: &str, lengths: &Vec<u32>) -> bool {
+fn is_valid(s: &str, lengths: &[u32]) -> bool {
     let parts_lengths = s
         .split('.')
         .filter(|&p| !p.is_empty())

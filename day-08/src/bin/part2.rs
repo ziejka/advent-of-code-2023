@@ -2,7 +2,7 @@ use rayon::prelude::*;
 use std::collections::HashMap;
 
 fn walk(
-    instructions_iter: &Vec<usize>,
+    instructions_iter: &[usize],
     codes: &HashMap<Box<str>, [Box<str>; 2]>,
     start_key: &Box<str>,
     num_steps: &mut usize,

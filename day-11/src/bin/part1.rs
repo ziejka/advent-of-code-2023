@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 fn _find_shortest_path(
-    grid: &Vec<Vec<char>>,
+    grid: &[Vec<char>],
     start: (usize, usize),
     end: (usize, usize),
 ) -> Option<u32> {
@@ -50,7 +50,7 @@ fn calculate_distance_between_points(p1: (usize, usize), p2: (usize, usize)) -> 
     (x + y) as u32
 }
 
-fn find_empty_rows(grid: &Vec<Vec<char>>) -> Vec<usize> {
+fn find_empty_rows(grid: &[Vec<char>]) -> Vec<usize> {
     let mut empty_rows = Vec::new();
 
     for (i, row) in grid.iter().enumerate() {
@@ -62,7 +62,7 @@ fn find_empty_rows(grid: &Vec<Vec<char>>) -> Vec<usize> {
     empty_rows
 }
 
-fn find_empty_columns(grid: &Vec<Vec<char>>) -> Vec<usize> {
+fn find_empty_columns(grid: &[Vec<char>]) -> Vec<usize> {
     let mut empty_columns = Vec::new();
 
     for i in 0..grid[0].len() {
@@ -74,7 +74,7 @@ fn find_empty_columns(grid: &Vec<Vec<char>>) -> Vec<usize> {
     empty_columns
 }
 
-fn insert_empty_columns(grid: &mut Vec<Vec<char>>, empty_columns: &Vec<usize>) {
+fn insert_empty_columns(grid: &mut Vec<Vec<char>>, empty_columns: &[usize]) {
     for row in grid.iter_mut() {
         for (num_idx, i) in empty_columns.iter().enumerate() {
             row.insert(*i + num_idx, '.');
@@ -82,7 +82,7 @@ fn insert_empty_columns(grid: &mut Vec<Vec<char>>, empty_columns: &Vec<usize>) {
     }
 }
 
-fn insert_empty_rows(grid: &mut Vec<Vec<char>>, empty_rows: &Vec<usize>) {
+fn insert_empty_rows(grid: &mut Vec<Vec<char>>, empty_rows: &[usize]) {
     for (idx, i) in empty_rows.iter().enumerate() {
         let row = vec!['.'; grid[0].len()];
         grid.insert(*i + idx, row);

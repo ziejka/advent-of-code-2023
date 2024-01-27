@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 fn _find_shortest_path(
-    grid: &Vec<Vec<char>>,
+    grid: &[Vec<char>],
     start: (usize, usize),
     end: (usize, usize),
 ) -> Option<u32> {
@@ -46,8 +46,8 @@ fn _find_shortest_path(
 fn calculate_distance_between_points(
     p1: (usize, usize),
     p2: (usize, usize),
-    empty_rows: &Vec<usize>,
-    empty_columns: &Vec<usize>,
+    empty_rows: &[usize],
+    empty_columns: &[usize],
 ) -> u64 {
     let universe_size = 999999;
     let mut dist = 0;
@@ -86,7 +86,7 @@ fn calculate_distance_between_points(
     return dist;
 }
 
-fn find_empty_rows(grid: &Vec<Vec<char>>) -> Vec<usize> {
+fn find_empty_rows(grid: &[Vec<char>]) -> Vec<usize> {
     let mut empty_rows = Vec::new();
 
     for (i, row) in grid.iter().enumerate() {
@@ -98,7 +98,7 @@ fn find_empty_rows(grid: &Vec<Vec<char>>) -> Vec<usize> {
     empty_rows
 }
 
-fn find_empty_columns(grid: &Vec<Vec<char>>) -> Vec<usize> {
+fn find_empty_columns(grid: &[Vec<char>]) -> Vec<usize> {
     let mut empty_columns = Vec::new();
 
     for i in 0..grid[0].len() {

@@ -1,4 +1,4 @@
-fn _println_platform(platform: &Vec<Vec<char>>) {
+fn _println_platform(platform: &[Vec<char>]) {
     platform.iter().for_each(|row| {
         let s: String = row.iter().collect();
         println!("{s}");

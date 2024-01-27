@@ -1,4 +1,4 @@
-fn rotate_pattern(pattern: &Vec<&str>) -> Vec<String> {
+fn rotate_pattern(pattern: &[&str]) -> Vec<String> {
     let mut new_vec: Vec<String> = vec!["".to_string(); pattern[0].len()];
 
     pattern.iter().for_each(|str| {
@@ -24,7 +24,7 @@ fn is_equal_with_smudge(l1: &str, l2: &str) -> bool {
     return true;
 }
 
-fn is_reflection_from_idx(pattern: &Vec<&str>, start: usize) -> bool {
+fn is_reflection_from_idx(pattern: &[&str], start: usize) -> bool {
     let mut i = start;
     let mut j = start + 1;
 
@@ -42,7 +42,7 @@ fn is_reflection_from_idx(pattern: &Vec<&str>, start: usize) -> bool {
     return true;
 }
 
-fn get_reflection_point(pattern: &Vec<&str>) -> Option<usize> {
+fn get_reflection_point(pattern: &[&str]) -> Option<usize> {
     for ((idx, l1), l2) in pattern
         .iter()
         .enumerate()

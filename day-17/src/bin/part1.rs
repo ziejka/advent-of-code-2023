@@ -2,8 +2,9 @@ use std::{
     cmp::Ordering,
     collections::{BinaryHeap, HashSet},
     fmt::Display,
-    io, vec,
+    vec,
 };
+
 #[derive(PartialEq, Eq, Debug)]
 struct State {
     cost: u32,
@@ -20,12 +21,6 @@ impl Display for State {
 impl Ord for State {
     fn cmp(&self, other: &Self) -> Ordering {
         other.cost.cmp(&self.cost)
-        // .then_with(|| {
-        //     self.point
-        //         .1
-        //         .cmp(&other.point.1)
-        //         .then_with(|| self.point.0.cmp(&other.point.0))
-        // })
     }
 }
 
@@ -166,24 +161,24 @@ fn shortest_path(points: &mut Vec<Vec<u32>>) -> Option<u32> {
 
         if current_state.point == goal {
             // println!("Current {:?}", current_state.point);
-            let mut print_map: Vec<Vec<_>> = points
-                .iter()
-                .map(|r| r.iter().map(|_| '.').collect())
-                .collect();
+            // let mut print_map: Vec<Vec<_>> = points
+            //     .iter()
+            //     .map(|r| r.iter().map(|_| '.').collect())
+            //     .collect();
 
-            current_state
-                .history
-                .items
-                .iter()
-                .enumerate()
-                .for_each(|(_, p)| print_map[p.1][p.0] = '#');
+            // current_state
+            //     .history
+            //     .items
+            //     .iter()
+            //     .enumerate()
+            //     .for_each(|(_, p)| print_map[p.1][p.0] = '#');
 
-            print_map.iter().for_each(|r| {
-                r.iter().for_each(|x| {
-                    print!("{}", x);
-                });
-                print!("\n");
-            });
+            // print_map.iter().for_each(|r| {
+            //     r.iter().for_each(|x| {
+            //         print!("{}", x);
+            //     });
+            //     print!("\n");
+            // });
 
             return Some(current_state.cost);
         }
@@ -197,7 +192,9 @@ fn shortest_path(points: &mut Vec<Vec<u32>>) -> Option<u32> {
         // }
 
         for (new_point, c) in points.get_neighbors(&current_state.point, &current_state.history) {
-            let new_history = current_state.history.clone();
+            let new_history = History {
+                items: current_state.history.get_last_n_items(4).into(),
+            };
 
             let next = State {
                 cost: current_state.cost + c,
@@ -232,7 +229,7 @@ fn main() {
     let _input = std::fs::read_to_string("src/bin/input").expect("file name input");
     let _test = std::fs::read_to_string("src/bin/test").expect("file name input");
 
-    process(_input);
+    process(_test);
 }
 
 #[cfg(test)]

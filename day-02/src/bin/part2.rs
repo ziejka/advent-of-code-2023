@@ -53,7 +53,7 @@ fn get_game_tuple(s: &str) -> Option<Vec<Vec<(Color, u32)>>> {
     return Some(rest);
 }
 
-fn find_color(round: &Vec<(Color, u32)>, default_color: Color) -> (Color, u32) {
+fn find_color(round: &[(Color, u32)], default_color: Color) -> (Color, u32) {
     match round.iter().find(|&&(color, _)| color == default_color) {
         Some(&(color, value)) => (color, value),
         None => (default_color, 1),
